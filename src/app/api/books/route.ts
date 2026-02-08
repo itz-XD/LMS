@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { books } from "@/lib/schema/books";
 
+export async function GET() {
+  const allBooks = await db.select().from(books);
+  return NextResponse.json(allBooks);
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
 
