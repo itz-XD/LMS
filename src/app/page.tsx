@@ -1,4 +1,12 @@
 import Image from "next/image";
+import { db } from "@/lib/db";
+
+async function testDb() {
+  await db.execute("select 1");
+  console.log("✅ Database connected");
+}
+
+testDb();
 
 export default function Home() {
   return (
