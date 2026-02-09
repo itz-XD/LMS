@@ -90,6 +90,27 @@ export default function Home() {
     }
   }
 
+  async function returnBook() {
+    if (!borrowerId || !borrowBookId) return;
+
+    const res = await fetch("/api/return", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        borrowerId,
+        bookId: borrowBookId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error);
+    } else {
+      alert("Book returned successfully");
+    }
+  }
+
   return (
     <main className="p-6 max-w-xl space-y-6">
       <div className="flex justify-between items-center">
@@ -184,6 +205,9 @@ export default function Home() {
         </div>
 
         <Button onClick={borrowBook}>Borrow</Button>
+        <Button variant="secondary" onClick={returnBook}>
+          Return Book
+        </Button>
       </div>
 
       {/* Books List */}
