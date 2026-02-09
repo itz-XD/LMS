@@ -45,6 +45,25 @@ export default function Home() {
     fetchBooks();
   }, []);
 
+  const [selectedBookId, setSelectedBookId] = useState<number | "">("");
+  const [quantity, setQuantity] = useState(1);
+
+  async function addCopies() {
+    if (!selectedBookId) return;
+
+    await fetch("/api/book-copies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bookId: selectedBookId,
+        quantity,
+      }),
+    });
+
+    setQuantity(1);
+    setSelectedBookId("");
+  }
+
   return (
     <main className="p-6 max-w-xl space-y-6">
       <div className="flex justify-between items-center">
@@ -67,6 +86,39 @@ export default function Home() {
         </div>
 
         <Button onClick={addBook}>Add Book</Button>
+      </div>
+
+      {/* Add Book Copies */}
+      <div className="space-y-4 border p-4 rounded">
+        <h2 className="font-semibold">Add Book Copies</h2>
+
+        <div>
+          <Label>Select Book</Label>
+          <select
+            className="w-full border rounded p-2"
+            value={selectedBookId}
+            onChange={(e) => setSelectedBookId(Number(e.target.value))}
+          >
+            <option value="">Select a book</option>
+            {books.map((book) => (
+              <option key={book.id} value={book.id}>
+                {book.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <Label>Number of Copies</Label>
+          <Input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+          />
+        </div>
+
+        <Button onClick={addCopies}>Add Copies</Button>
       </div>
 
       {/* Books List */}
