@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,19 +47,22 @@ export default function Home() {
 
   return (
     <main className="p-6 max-w-xl space-y-6">
-      <h1 className="text-2xl font-bold">Library</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Library</h1>
+        <ThemeToggle />
+      </div>
 
       {/* Add Book Form */}
       <div className="space-y-4 border p-4 rounded">
         <h2 className="font-semibold">Add Book</h2>
 
         <div>
-          <Label>Title</Label>
+          <Label className="mb-2">Title</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
         <div>
-          <Label>ISBN</Label>
+          <Label className="mb-2">ISBN</Label>
           <Input value={isbn} onChange={(e) => setIsbn(e.target.value)} />
         </div>
 
