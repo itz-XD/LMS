@@ -44,12 +44,18 @@ export async function POST(req: Request) {
   LIMIT 1
 `);
 
-  if (availableCopy.length === 0) {
+  // if (availableCopy.length === 0) {
+  //   return NextResponse.json({ error: "No available copies" }, { status: 400 });
+  // }
+
+  // // const copyId = availableCopy[0].id;
+  // const copyId = availableCopy.rows[0]?.id;
+
+  if (availableCopy.rows.length === 0) {
     return NextResponse.json({ error: "No available copies" }, { status: 400 });
   }
 
-  // const copyId = availableCopy[0].id;
-  const copyId = availableCopy.rows[0]?.id;
+  const copyId = availableCopy.rows[0].id as number;
 
   if (!copyId) {
     return NextResponse.json({ error: "No available copies" }, { status: 400 });
