@@ -64,6 +64,32 @@ export default function Home() {
     setSelectedBookId("");
   }
 
+  const borrowers = [{ id: 1, name: "User One" }];
+
+  const [borrowerId, setBorrowerId] = useState<number | "">("");
+  const [borrowBookId, setBorrowBookId] = useState<number | "">("");
+
+  async function borrowBook() {
+    if (!borrowerId || !borrowBookId) return;
+
+    const res = await fetch("/api/borrow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        borrowerId,
+        bookId: borrowBookId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error);
+    } else {
+      alert("Book borrowed successfully");
+    }
+  }
+
   return (
     <main className="p-6 max-w-xl space-y-6">
       <div className="flex justify-between items-center">
@@ -119,6 +145,45 @@ export default function Home() {
         </div>
 
         <Button onClick={addCopies}>Add Copies</Button>
+      </div>
+
+      {/* Borrow Book */}
+      <div className="space-y-4 border p-4 rounded">
+        <h2 className="font-semibold">Borrow Book</h2>
+
+        <div>
+          <Label>Borrower</Label>
+          <select
+            className="w-full border rounded p-2"
+            value={borrowerId}
+            onChange={(e) => setBorrowerId(Number(e.target.value))}
+          >
+            <option value="">Select borrower</option>
+            {borrowers.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <Label>Select Book</Label>
+          <select
+            className="w-full border rounded p-2"
+            value={borrowBookId}
+            onChange={(e) => setBorrowBookId(Number(e.target.value))}
+          >
+            <option value="">Select book</option>
+            {books.map((book) => (
+              <option key={book.id} value={book.id}>
+                {book.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Button onClick={borrowBook}>Borrow</Button>
       </div>
 
       {/* Books List */}
