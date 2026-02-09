@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Book = {
   id: number;
@@ -17,6 +23,14 @@ export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [title, setTitle] = useState("");
   const [isbn, setIsbn] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedBookId, setSelectedBookId] = useState<number | "">("");
+  const [quantity, setQuantity] = useState(1);
+  const [borrowerId, setBorrowerId] = useState<number | "">("");
+  const [borrowBookId, setBorrowBookId] = useState<number | "">("");
+  const [borrowLoading, setBorrowLoading] = useState(false);
+  const [returnLoading, setReturnLoading] = useState(false);
 
   async function fetchBooks() {
     const res = await fetch("/api/books");
@@ -45,9 +59,6 @@ export default function Home() {
     fetchBooks();
   }, []);
 
-  const [selectedBookId, setSelectedBookId] = useState<number | "">("");
-  const [quantity, setQuantity] = useState(1);
-
   async function addCopies() {
     if (!selectedBookId) return;
 
@@ -66,48 +77,157 @@ export default function Home() {
 
   const borrowers = [{ id: 1, name: "User One" }];
 
-  const [borrowerId, setBorrowerId] = useState<number | "">("");
-  const [borrowBookId, setBorrowBookId] = useState<number | "">("");
+  // async function borrowBook() {
+  //   // if (!borrowerId || !borrowBookId) return;
+  //   if (!borrowerId || !borrowBookId) {
+  //     setModalMessage("Please select borrower and book");
+  //     setOpenModal(true);
+  //     return;
+  //   }
+
+  //   setLoading(true); // 🔥 START LOADING
+
+  //   const res = await fetch("/api/borrow", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({
+  //       borrowerId,
+  //       bookId: borrowBookId,
+  //     }),
+  //   });
+
+  //   const data = await res.json();
+
+  //   if (!res.ok) {
+  //     // alert(data.error);
+
+  //     setModalMessage(data.error);
+  //     setOpenModal(true);
+  //   } else {
+  //     // alert("Book borrowed successfully");
+
+  //     setModalMessage("Book borrowed successfully");
+  //     setOpenModal(true);
+  //   }
+  // }
 
   async function borrowBook() {
-    if (!borrowerId || !borrowBookId) return;
+    if (!borrowerId || !borrowBookId) {
+      setModalMessage("Please select borrower and book");
+      setOpenModal(true);
+      return;
+    }
 
-    const res = await fetch("/api/borrow", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        borrowerId,
-        bookId: borrowBookId,
-      }),
-    });
+    setBorrowLoading(true);
+    const start = Date.now();
+    const MIN_DELAY = 300;
 
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/borrow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          borrowerId,
+          bookId: borrowBookId,
+        }),
+      });
 
-    if (!res.ok) {
-      alert(data.error);
-    } else {
-      alert("Book borrowed successfully");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setModalMessage(data.error);
+      } else {
+        setModalMessage("Book borrowed successfully");
+        await fetchBooks();
+      }
+
+      setOpenModal(true);
+    } catch {
+      setModalMessage("Something went wrong");
+      setOpenModal(true);
+    } finally {
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(MIN_DELAY - elapsed, 0);
+
+      setTimeout(() => {
+        setBorrowLoading(false);
+      }, remaining);
     }
   }
 
+  // async function returnBook() {
+  //   // if (!borrowerId || !borrowBookId) return;
+  //   if (!borrowerId || !borrowBookId) {
+  //     setModalMessage("Please select borrower and book");
+  //     setOpenModal(true);
+  //     return;
+  //   }
+
+  //   const res = await fetch("/api/return", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({
+  //       borrowerId,
+  //       bookId: borrowBookId,
+  //     }),
+  //   });
+
+  //   const data = await res.json();
+
+  //   if (!res.ok) {
+  //     // alert(data.error);
+
+  //     setModalMessage(data.error);
+  //     setOpenModal(true);
+  //   } else {
+  //     // alert("Book returned successfully");
+
+  //     setModalMessage("Book returned successfully");
+  //     setOpenModal(true);
+  //   }
+  // }
+
   async function returnBook() {
-    if (!borrowerId || !borrowBookId) return;
+    if (!borrowerId || !borrowBookId) {
+      setModalMessage("Please select borrower and book");
+      setOpenModal(true);
+      return;
+    }
 
-    const res = await fetch("/api/return", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        borrowerId,
-        bookId: borrowBookId,
-      }),
-    });
+    setReturnLoading(true);
+    const start = Date.now();
+    const MIN_DELAY = 300;
 
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/return", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          borrowerId,
+          bookId: borrowBookId,
+        }),
+      });
 
-    if (!res.ok) {
-      alert(data.error);
-    } else {
-      alert("Book returned successfully");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setModalMessage(data.error);
+      } else {
+        setModalMessage("Book returned successfully");
+        await fetchBooks();
+      }
+
+      setOpenModal(true);
+    } catch {
+      setModalMessage("Something went wrong");
+      setOpenModal(true);
+    } finally {
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(MIN_DELAY - elapsed, 0);
+
+      setTimeout(() => {
+        setReturnLoading(false);
+      }, remaining);
     }
   }
 
@@ -204,9 +324,16 @@ export default function Home() {
           </select>
         </div>
 
-        <Button onClick={borrowBook}>Borrow</Button>
-        <Button variant="secondary" onClick={returnBook}>
-          Return Book
+        <Button onClick={borrowBook} disabled={borrowLoading}>
+          {borrowLoading ? "Processing..." : "Borrow"}
+        </Button>
+
+        <Button
+          variant="secondary"
+          onClick={returnBook}
+          disabled={returnLoading}
+        >
+          {returnLoading ? "Processing..." : "Return"}
         </Button>
       </div>
 
@@ -222,6 +349,15 @@ export default function Home() {
           ))}
         </ul>
       </div>
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Status</DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm text-muted-foreground">{modalMessage}</p>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
