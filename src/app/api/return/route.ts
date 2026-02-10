@@ -33,16 +33,25 @@ export async function POST(req: Request) {
   LIMIT 1
 `);
 
-  if (activeBorrow.length === 0) {
+  // if (activeBorrow.length === 0) {
+  //   return NextResponse.json(
+  //     { error: "No active borrow found" },
+  //     { status: 400 },
+  //   );
+  // }
+
+  // // const borrowId = activeBorrow[0].id;
+
+  // const borrowId = activeBorrow.rows[0]?.id;
+
+  if (activeBorrow.rows.length === 0) {
     return NextResponse.json(
       { error: "No active borrow found" },
       { status: 400 },
     );
   }
 
-  // const borrowId = activeBorrow[0].id;
-
-  const borrowId = activeBorrow.rows[0]?.id;
+  const borrowId = activeBorrow.rows[0].id as number;
 
   if (!borrowId) {
     return NextResponse.json(
